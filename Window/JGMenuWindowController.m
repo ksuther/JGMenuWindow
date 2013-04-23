@@ -8,6 +8,8 @@
 
 #import "JGMenuWindowController.h"
 
+static CGFloat JGMenuMaxWidth = 300;
+
 @interface JGMenuWindowController()
 
 - (void)loadHeights;
@@ -16,28 +18,16 @@
 @end
 
 @implementation JGMenuWindowController
-@synthesize itemsTable, _headerView, menuDelegate, proMode, parentMenu, mouseOverRow;
+@synthesize itemsTable, _headerView, menuDelegate, proMode, canBecomeKey, parentMenu, mouseOverRow;
 @dynamic menuItems, headerView, statusItemImage, statusItemAlternateImage, statusItemTitle, isStatusItem;
 
 - (id)initWithWindowNibName:(NSString *)windowNibName {
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
-		// Set up status item
-	    NSStatusBar *bar = [NSStatusBar systemStatusBar];
-		
-		statusItem = [bar statusItemWithLength:NSVariableStatusItemLength];
-		[statusItem retain];
-		
-		customStatusView = [[CustomStatusItemView alloc] initWithFrame:NSMakeRect(0, 0, 30, 20)];
-		[customStatusView setTarget:self];
-		[customStatusView setSelectingAction:@selector(statusItemSelected:)];
-		[customStatusView setDeselectingAction:@selector(statusItemDeselected:)];
-		[customStatusView setStatusItem:statusItem];
-		[statusItem setView:customStatusView];
-		
 		// Set delegates
 		[(RoundWindowFrameView *)[[self.window contentView] superview] setTableDelegate:self];
 		[[self window] setDelegate:self];
+        [self setCanBecomeKey:YES];
 		
 		// Set up ivars
 		mouseOverRow = -1;
@@ -47,9 +37,10 @@
 
 #pragma mark Misc.
 
-- (void)highlightMenuItemAtIndex:(int)rowIndex {
+- (void)highlightMenuItemAtIndex:(NSInteger)rowIndex {
 	mouseOverRow = rowIndex;
 	[itemsTable reloadData];
+    [itemsTable setNeedsDisplay:YES];
 }
 
 #pragma mark Opening menu without status items
@@ -65,8 +56,17 @@
 	[self loadHeightsWithWindowOrigin:point whichIsSubmenu:NO];
 	[(RoundWindowFrameView *)[[self.window contentView] superview] setAllCornersRounded:YES];
 	[(RoundWindowFrameView *)[[self.window contentView] superview] setProMode:proMode];
+    [(BorderlessWindow *)self.window setAllowsKey:[self canBecomeKey]];
 	[self.window makeKeyAndOrderFront:self];
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+}
+
+- (void)selectItemAtIndex:(NSInteger)index
+{
+    isSelecting = YES;
+    [self resetMouseOverRowToAndClose:[NSNumber numberWithInt:index]];
+    JGMenuItem *selectedItem = [menuItems objectAtIndex:index];
+    [[selectedItem target] performSelector:[selectedItem action] withObject:selectedItem];
 }
 
 #pragma mark Dealing with submenu's
@@ -80,10 +80,11 @@
 	}
 	
 	BOOL side = ![self loadHeightsWithWindowOrigin:point whichIsSubmenu:YES]; // Returns 0 = right while we want 0 = left
-	NSLog(@"side = %i", side);
+    
 	[(RoundWindowFrameView *)[[self.window contentView] superview] setIsSubmenuOnSide:side];
 	[self setProMode:parentMenu.proMode]; // Respects parent's style
 	[(RoundWindowFrameView *)[[self.window contentView] superview] setProMode:proMode]; 
+    [(BorderlessWindow *)self.window setAllowsKey:[self canBecomeKey]];
 	[self.window makeKeyAndOrderFront:self];
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 }
@@ -119,7 +120,6 @@
 	if (itemWithOpenSubmenu != nil)
 		return;
 	else {
-		NSLog(@"SELF window");
 		[self closeWindow];
 	}
 }
@@ -133,28 +133,8 @@
 		[parentMenu closeWindow];
 	} 
 	
-    timer = [[NSTimer scheduledTimerWithTimeInterval:0.05 target:self selector:@selector(fade:) userInfo:nil repeats:YES] retain];
+    [self.window orderOut:nil];
 	[customStatusView setHighlighted:NO];
-}
-
-- (void)fade:(NSTimer *)theTimer
-{
-    if ([self.window alphaValue] > 0.0) {
-        // If window is still partially opaque, reduce its opacity.
-        [self.window setAlphaValue:[self.window alphaValue] - 0.3];
-    } else {
-        // Otherwise, if window is completely transparent, destroy the timer and close the window.
-        [timer invalidate];
-        [timer release];
-        timer = nil;
-		
-	//	NSLog(@"called");
-        
-        [self.window close];
-        
-        // Make the window fully opaque again for next time.
-        [self.window setAlphaValue:1.0];
-    }
 }
 
 #pragma mark Handling changes to menuItems and headerView
@@ -167,21 +147,27 @@
 	menuItems = [items copy];
 	
 	// Work out headerView sizing based on string size
+    float width = 0;
+    for (JGMenuItem *item in menuItems) {
+        NSSize size = [item.title sizeWithAttributes:[NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:12] forKey:NSFontAttributeName]];
+        int amountToAdd = 40;
+        if (item.submenu != nil)
+            amountToAdd += 15;
+        if (size.width + amountToAdd > width)
+            width = size.width + amountToAdd;
+    }
+    
+    width = MIN(width, JGMenuMaxWidth);
+    
 	if (headerView == nil) {
-		float width = 0;
-		for (JGMenuItem *item in menuItems) {
-			NSSize size = [item.title sizeWithAttributes:[NSDictionary dictionaryWithObject:[NSFont fontWithName: @"Lucida Grande" size: 13] forKey:NSFontAttributeName]];
-			int amountToAdd = 40;
-			if (item.submenu != nil)
-				amountToAdd += 15;
-			if (size.width + amountToAdd > width)
-				width = size.width + amountToAdd;
-		}
-		headerView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, width, 0)];	
-	}	
+		headerView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, width, 0)];
+	} else {
+        NSRect headerRect = [headerView frame];
+        headerRect.size.width = width;
+        [headerView setFrame:headerRect];
+    }
 
 	[itemsTable reloadData];
-	[self loadHeights];
 }
 
 - (NSView *)headerView {
@@ -319,9 +305,7 @@
 	if ((newFrame.origin.x + newFrame.size.width) > screenRect.size.width)
 		whichSide = 1;
 	
-	NSLog(@"%i && %i && %i", whichSide, isSubmenu, parentMenu != nil);
 	if (whichSide && isSubmenu && parentMenu != nil) {
-		NSLog(@"is changing");
 		xOrigin = xOrigin - parentMenu.window.frame.size.width - newFrame.size.width;
 	}
 	
@@ -329,7 +313,7 @@
 	
 	// Set the windows frame
 	
-	[self.window setFrame:newFrame display:YES];
+	[self.window setFrame:newFrame display:NO];
 	
 	// Adjust Table view frame, has to be done after window frame change other wise there are some complications with autoresizing
 	
@@ -342,7 +326,7 @@
 		tableOldFrame = NSIntegralRect(tableOldFrame);
 		[itemsTable setFrame:tableOldFrame];
 		[[[itemsTable tableColumns] objectAtIndex:0] setWidth:tableOldFrame.size.width];
-		[[[itemsTable superview] superview] setFrame:NSMakeRect(tableOldFrame.origin.x, tableOldFrame.origin.y - 2, tableOldFrame.size.width, tableOldFrame.size.height)];
+		[[[itemsTable superview] superview] setFrame:NSMakeRect(tableOldFrame.origin.x, tableOldFrame.origin.y - 3, tableOldFrame.size.width, tableOldFrame.size.height)];
 	}
 	
 	return whichSide;
@@ -432,8 +416,6 @@
 }
 
 - (void)statusItemSelected:(id)sender {	
-	NSLog(@"selected");
-	
 	NSMenu *fakeMenu = [[NSMenu alloc] init]; // Used to make sure another menu such as Spotlight will disapear when this is opened
 	[statusItem popUpStatusItemMenu:fakeMenu];
 	
@@ -458,26 +440,14 @@
 
 #pragma mark TableDetectionDelegate
 
-- (void)flashHighlightForRowThenClose:(NSNumber *)row {
-	mouseOverRow = -1;
-	[itemsTable reloadData];
-	timer = [[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(resetMouseOverRowToAndClose:) userInfo:row repeats:NO] retain];
-}
-
-- (void)resetMouseOverRowToAndClose:(NSTimer *)sender {
-	mouseOverRow = [[sender userInfo] intValue];
+- (void)resetMouseOverRowToAndClose:(NSNumber *)row {
+	mouseOverRow = [row intValue];
 	[itemsTable reloadData];
 	if ([menuDelegate respondsToSelector:@selector(shouldCloseMenuAfterSelectingRow:)]) {
-		if ([menuDelegate shouldCloseMenuAfterSelectingRow:[[sender userInfo] intValue]]) {
-			[timer invalidate];
-			[timer release];
-			timer = nil;
+		if ([menuDelegate shouldCloseMenuAfterSelectingRow:[row intValue]]) {
 			[self closeWindow];
 		}
 	} else {
-		[timer invalidate];
-        [timer release];
-        timer = nil;
 		[self closeWindow];
 	}
 }
@@ -536,10 +506,7 @@
 - (void)mouseDownAtLocation:(NSPoint)loc {
 	int row = [itemsTable rowAtPoint:[itemsTable convertPoint:loc fromView:nil]];
 	if (row >= 0) {
-		isSelecting = YES;
-		[self flashHighlightForRowThenClose:[NSNumber numberWithInt:row]];
-		JGMenuItem *selectedItem = [menuItems objectAtIndex:row];
-		[[selectedItem target] performSelector:[selectedItem action] withObject:selectedItem];
+		[self selectItemAtIndex:row];
 	}
 }
 
@@ -622,6 +589,8 @@
 		if ([aTableView lockFocusIfCanDraw]) {
 			NSRect rowRect = [aTableView rectOfRow:rowIndex];
 			//NSRect columnRect = [aTableView rectOfColumn:[[aTableView tableColumns] indexOfObject:aTableColumn]];
+            
+            rowRect.origin.y--;
 			
 			if (!proMode) {
 				NSGradient* aGradient =
@@ -636,13 +605,13 @@
 				rectToDraw.origin.y = rectToDraw.origin.y + 1;
 				[aGradient drawInRect:rectToDraw angle:90];
 				
-				NSRect upperLineRect = [aTableView rectOfRow:rowIndex];
+				NSRect upperLineRect = rowRect;
 				upperLineRect.origin.y = upperLineRect.origin.y + 1;
 				upperLineRect.size.height = 1.0;
 				[[NSColor colorWithDeviceRed:0.376 green:0.498 blue:0.925 alpha:1.000] set];
 				NSRectFill(upperLineRect);
 				
-				NSRect lowerLineRect = [aTableView rectOfRow:rowIndex];
+				NSRect lowerLineRect = rowRect;
 				lowerLineRect.origin.y = NSMaxY(lowerLineRect) - 1;
 				lowerLineRect.size.height = 1.0;
 				[[NSColor colorWithDeviceRed:0.169 green:0.318 blue:0.914 alpha:1.000] set];

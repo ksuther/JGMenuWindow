@@ -11,4 +11,6 @@
 	NSView *childContentView;
 }
 
+@property(nonatomic, assign) BOOL allowsKey;
+
 @end

@@ -34,7 +34,7 @@
 	CustomStatusItemView *customStatusView; // PRIVATE: The Custom view within the status item
 	
 	NSTableView *itemsTable; // PRIVATE: The table where the items are displaye
-	int mouseOverRow; // PRIVATE: Used to store which row the mouse is hovering over
+	NSInteger mouseOverRow; // PRIVATE: Used to store which row the mouse is hovering over
 	
 	NSView *_headerView; // PRIVATE: The header view conainer
 	
@@ -58,8 +58,9 @@
 	NSImage *statusItemAlternateImage; // Relayed to the customStatusView to set the Status Item alternate image
 	NSString *statusItemTitle; // Relayed to the customStatusView to set the Status Item title
 	
-	BOOL isStatusItem; // Default is YES
+	BOOL isStatusItem; // Default is NO
 	BOOL proMode; // Want your menu to look like those in the Apple Pro apps? then set this to YES!
+    BOOL canBecomeKey; // Default is YES
 }
 
 @property (assign) IBOutlet NSTableView *itemsTable;
@@ -72,12 +73,14 @@
 @property (nonatomic, copy) NSString *statusItemTitle;
 @property (nonatomic, assign) BOOL isStatusItem;
 @property (nonatomic, assign) BOOL proMode;
+@property (nonatomic, assign) BOOL canBecomeKey;
 @property (nonatomic, retain) JGMenuWindowController *parentMenu; // PRIVATE: Even though this is a property it should only be accessed by another menu controller
-@property (nonatomic, assign) int mouseOverRow; // PRIVATE: Even though this is a property it should only be accessed by another menu controller
+@property (nonatomic, assign) NSInteger mouseOverRow; // PRIVATE: Even though this is a property it should only be accessed by another menu controller
 
 
-- (void)highlightMenuItemAtIndex:(int)rowIndex; // Forcefully highlight a menu item
+- (void)highlightMenuItemAtIndex:(NSInteger)rowIndex; // Forcefully highlight a menu item
 - (void)closeWindow; // Close window with fade out
 - (void)popUpContextMenuAtPoint:(NSPoint)point; // Pop up the menu at a specific point
+- (void)selectItemAtIndex:(NSInteger)index;
 
 @end

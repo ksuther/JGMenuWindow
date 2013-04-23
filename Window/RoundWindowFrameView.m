@@ -15,6 +15,10 @@
 #import "RoundWindowFrameView.h"
 #import "NSBezierPath+PXRoundedRectangleAdditions.h"
 
+@interface RoundWindowFrameView ()
+@property(nonatomic, strong) NSTrackingArea *trackingArea;
+@end
+
 @implementation RoundWindowFrameView
 @synthesize tableDelegate;
 @dynamic allCornersRounded, proMode;
@@ -65,6 +69,19 @@
 								  nil] autorelease];
 		[aGradient drawInBezierPath:path angle:90];
 	}
+}
+
+- (void)viewDidMoveToWindow
+{
+    if ([self window]) {
+        NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:NSZeroRect options:NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect owner:self userInfo:nil];
+        
+        [self addTrackingArea:trackingArea];
+        [self setTrackingArea:trackingArea];
+    } else {
+        [self removeTrackingArea:[self trackingArea]];
+        [self setTrackingArea:nil];
+    }
 }
 
 #pragma mark Dynamics

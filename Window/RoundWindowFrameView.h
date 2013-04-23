@@ -41,4 +41,6 @@
 
 - (void)setIsSubmenuOnSide:(int)side; // 0 == left. 1 == right.
 
+- (void)mouseDownInTableViewWithEvent:(NSEvent *)event;
+
 @end

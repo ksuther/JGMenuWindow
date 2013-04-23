@@ -17,6 +17,6 @@ typedef enum _OSCornerTypes
 } OSCornerType;
 
 @interface NSBezierPath(PXRoundedRectangle)
-+ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (float)radius;
-+ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (float)radius inCorners:(OSCornerType)corners;
++ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (CGFloat)radius;
++ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (CGFloat)radius inCorners:(OSCornerType)corners;
 @end

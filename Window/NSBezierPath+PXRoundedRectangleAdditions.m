@@ -11,7 +11,7 @@
 
 @implementation NSBezierPath(RoundedRectangle)
 
-+ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (float)radius inCorners:(OSCornerType)corners
++ (NSBezierPath *) bezierPathWithRoundedRect: (NSRect)aRect cornerRadius: (CGFloat)radius inCorners:(OSCornerType)corners
 {
 	NSBezierPath* path = [self bezierPath];
 	radius = MIN(radius, 0.5f * MIN(NSWidth(aRect), NSHeight(aRect)));
@@ -61,7 +61,7 @@
 	return path;	
 }
 
-+ (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)aRect cornerRadius:(float)radius
++ (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)aRect cornerRadius:(CGFloat)radius
 {
 	return [NSBezierPath bezierPathWithRoundedRect:aRect cornerRadius:radius inCorners:OSTopLeftCorner | OSTopRightCorner | OSBottomLeftCorner | OSBottomRightCorner];
 }

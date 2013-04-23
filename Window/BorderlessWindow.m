@@ -20,7 +20,8 @@
 								 styleMask:NSBorderlessWindowMask
 								   backing:bufferingType
 									 defer:flag]))
-    {    
+    {
+        [self setAllowsKey:YES];
 		[self setOpaque:NO];
 		[self setBackgroundColor:[NSColor clearColor]];
 		[self setLevel:NSPopUpMenuWindowLevel+1];
@@ -63,7 +64,7 @@
 	return childContentView;
 }
 
-- (BOOL) canBecomeKeyWindow { return YES; }
+- (BOOL) canBecomeKeyWindow { return [self allowsKey]; }
 - (BOOL) canBecomeMainWindow { return YES; }
 - (BOOL) acceptsFirstResponder { return YES; }
 - (BOOL) becomeFirstResponder { return YES; }
