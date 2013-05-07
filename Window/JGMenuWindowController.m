@@ -8,8 +8,6 @@
 
 #import "JGMenuWindowController.h"
 
-static CGFloat JGMenuMaxWidth = 300;
-
 @interface JGMenuWindowController()
 
 - (void)loadHeights;
@@ -157,7 +155,16 @@ static CGFloat JGMenuMaxWidth = 300;
             width = size.width + amountToAdd;
     }
     
-    width = MIN(width, JGMenuMaxWidth);
+    CGFloat minWidth = [self minWidth];
+    CGFloat maxWidth = [self maxWidth];
+    
+    if (minWidth > 0) {
+        width = MAX(width, minWidth);
+    }
+    
+    if (maxWidth > 0) {
+        width = MIN(width, maxWidth);
+    }
     
 	if (headerView == nil) {
 		headerView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, width, 0)];

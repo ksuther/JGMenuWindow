@@ -74,6 +74,8 @@
 @property (nonatomic, assign) BOOL isStatusItem;
 @property (nonatomic, assign) BOOL proMode;
 @property (nonatomic, assign) BOOL canBecomeKey;
+@property (nonatomic, assign) CGFloat minWidth;
+@property (nonatomic, assign) CGFloat maxWidth;
 @property (nonatomic, retain) JGMenuWindowController *parentMenu; // PRIVATE: Even though this is a property it should only be accessed by another menu controller
 @property (nonatomic, assign) NSInteger mouseOverRow; // PRIVATE: Even though this is a property it should only be accessed by another menu controller
 
