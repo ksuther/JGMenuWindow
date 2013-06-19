@@ -423,7 +423,7 @@
 }
 
 - (void)statusItemSelected:(id)sender {	
-	NSMenu *fakeMenu = [[NSMenu alloc] init]; // Used to make sure another menu such as Spotlight will disapear when this is opened
+	NSMenu *fakeMenu = [[[NSMenu alloc] init] autorelease]; // Used to make sure another menu such as Spotlight will disapear when this is opened
 	[statusItem popUpStatusItemMenu:fakeMenu];
 	
 	if (timer) { // Window shouldn't be closing right now. Stop the timer.

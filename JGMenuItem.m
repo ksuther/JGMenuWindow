@@ -24,7 +24,7 @@
 }
 
 + (NSString *)seperatorItem {
-	return [[self alloc] initWithTitle:@"--[SEPERATOR]--" target:NULL action:NULL];
+	return [[[self alloc] initWithTitle:@"--[SEPERATOR]--" target:NULL action:NULL] autorelease];
 }
 
 - (NSImage *)image {

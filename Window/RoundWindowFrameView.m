@@ -74,7 +74,7 @@
 - (void)viewDidMoveToWindow
 {
     if ([self window]) {
-        NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:NSZeroRect options:NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect owner:self userInfo:nil];
+        NSTrackingArea *trackingArea = [[[NSTrackingArea alloc] initWithRect:NSZeroRect options:NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect owner:self userInfo:nil] autorelease];
         
         [self addTrackingArea:trackingArea];
         [self setTrackingArea:trackingArea];
