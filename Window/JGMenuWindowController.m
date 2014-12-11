@@ -494,8 +494,9 @@
 	
 	if (parentMenu != nil) {
 		// i know i'm a submenu
-		if (convertedLoc.x > parentMenu.window.frame.origin.x && convertedLoc.y > parentMenu.window.frame.origin.y && convertedLoc.x < parentMenu.window.frame.origin.x + parentMenu.window.frame.size.width && convertedLoc.y < parentMenu.window.frame.origin.y + parentMenu.window.frame.size.height) {			
-			int mouseAtLoc = [parentMenu.itemsTable rowAtPoint:[parentMenu.itemsTable convertPoint:[parentMenu.window convertScreenToBase:convertedLoc] fromView:nil]];
+		if (convertedLoc.x > parentMenu.window.frame.origin.x && convertedLoc.y > parentMenu.window.frame.origin.y && convertedLoc.x < parentMenu.window.frame.origin.x + parentMenu.window.frame.size.width && convertedLoc.y < parentMenu.window.frame.origin.y + parentMenu.window.frame.size.height) {
+            NSPoint convertedPoint = [parentMenu.window convertRectFromScreen:(NSRect){.origin = convertedLoc, .size = NSZeroSize}].origin;
+			int mouseAtLoc = [parentMenu.itemsTable rowAtPoint:[parentMenu.itemsTable convertPoint:convertedPoint fromView:nil]];
 			if (mouseAtLoc == parentMenu.mouseOverRow)
 				return;
 			
@@ -723,7 +724,6 @@
 		centeredRect.origin.x = 17;
 		centeredRect.origin.y = NSMidY(rowRect) - (([image size].height / 2) - 1);
 		centeredRect = NSIntegralRect(centeredRect);
-		[image setFlipped:YES];
 		[image drawAtPoint:centeredRect.origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 		
 		// Pad the text accross further
