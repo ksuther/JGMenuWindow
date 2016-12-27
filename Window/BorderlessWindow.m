@@ -11,15 +11,9 @@
 
 @implementation BorderlessWindow
 
-- (id)initWithContentRect:(NSRect)contentRect 
-                styleMask:(NSUInteger)aStyle 
-                  backing:(NSBackingStoreType)bufferingType 
-                    defer:(BOOL)flag
+- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag
 {
-    if ((self = [super initWithContentRect:contentRect 
-								 styleMask:NSBorderlessWindowMask
-								   backing:bufferingType
-									 defer:flag]))
+    if ((self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:bufferingType defer:flag]))
     {
         [self setAllowsKey:YES];
 		[self setOpaque:NO];
