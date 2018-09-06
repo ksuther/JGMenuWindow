@@ -627,7 +627,7 @@
 				
 				[aTableView unlockFocus];
 				
-				[aCell setTextColor:[NSColor selectedMenuItemTextColor]];
+				[aCell setTextColor:[NSColor tertiaryLabelColor]];
 			} else {
 				NSGradient* aGradient =
 				[[[NSGradient alloc]
@@ -647,7 +647,7 @@
 			}
 		}
 	} else if (item.enabled == YES) {
-		[aCell setTextColor:[NSColor blackColor]];
+		[aCell setTextColor:[NSColor labelColor]];
 
 		if (proMode)
 			[aCell setTextColor:[NSColor whiteColor]];

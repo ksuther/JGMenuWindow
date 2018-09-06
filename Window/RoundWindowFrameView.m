@@ -47,8 +47,8 @@
 		
 		
 		NSGradient* aGradient = [[[NSGradient alloc] initWithColorsAndLocations:
-					[NSColor colorWithDeviceWhite:1 alpha:0.97], (CGFloat)0.0,
-					[NSColor colorWithDeviceWhite:1 alpha:0.97], (CGFloat)1.0,
+					[NSColor controlBackgroundColor], (CGFloat)0.0,
+					[NSColor controlBackgroundColor], (CGFloat)1.0,
 					nil] autorelease];
 		[aGradient drawInBezierPath:path angle:90];
 	} else {
