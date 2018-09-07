@@ -7,6 +7,7 @@
 //
 
 #import "JGMenuWindowController.h"
+#import "NSColor+JGAdditions.h"
 
 @interface JGMenuWindowController()
 
@@ -594,58 +595,37 @@
 	// Draw highlight
 	
 	if (mouseOverRow == rowIndex && ([aTableView selectedRow] != rowIndex) && item.enabled == YES) {
-		if ([aTableView lockFocusIfCanDraw]) {
 			NSRect rowRect = [aTableView rectOfRow:rowIndex];
 			//NSRect columnRect = [aTableView rectOfColumn:[[aTableView tableColumns] indexOfObject:aTableColumn]];
             
             rowRect.origin.y--;
 			
-			if (!proMode) {
-				NSGradient* aGradient =
-				[[[NSGradient alloc]
-				  initWithColorsAndLocations:
-				  [NSColor colorWithDeviceRed:0.416 green:0.529 blue:0.961 alpha:1.000], (CGFloat)0.0,
-				  [NSColor colorWithDeviceRed:0.212 green:0.365 blue:0.949 alpha:1.000], (CGFloat)1.0,
-				  nil]
-				 autorelease];
-				NSRect rectToDraw = rowRect;
-				rectToDraw.size.height = rowRect.size.height - 1;
-				rectToDraw.origin.y = rectToDraw.origin.y + 1;
-				[aGradient drawInRect:rectToDraw angle:90];
-				
-				NSRect upperLineRect = rowRect;
-				upperLineRect.origin.y = upperLineRect.origin.y + 1;
-				upperLineRect.size.height = 1.0;
-				[[NSColor colorWithDeviceRed:0.376 green:0.498 blue:0.925 alpha:1.000] set];
-				NSRectFill(upperLineRect);
-				
-				NSRect lowerLineRect = rowRect;
-				lowerLineRect.origin.y = NSMaxY(lowerLineRect) - 1;
-				lowerLineRect.size.height = 1.0;
-				[[NSColor colorWithDeviceRed:0.169 green:0.318 blue:0.914 alpha:1.000] set];
-				NSRectFill(lowerLineRect);
-				
-				[aTableView unlockFocus];
-				
-				[aCell setTextColor:[NSColor tertiaryLabelColor]];
-			} else {
-				NSGradient* aGradient =
-				[[[NSGradient alloc]
-				  initWithColorsAndLocations:
-				  [NSColor colorWithDeviceWhite:0.925 alpha:1.000], (CGFloat)0.0,
-				  [NSColor colorWithDeviceWhite:0.753 alpha:1.000], (CGFloat)1.0,
-				  nil]
-				 autorelease];
-				NSRect rectToDraw = rowRect;
-				rectToDraw.size.height = rowRect.size.height - 1;
-				rectToDraw.origin.y = rectToDraw.origin.y + 1;
-				[aGradient drawInRect:rectToDraw angle:90];
-				
-				[aTableView unlockFocus];
-				
-				[aCell setTextColor:[NSColor blackColor]];
-			}
-		}
+        if (!proMode) {
+            NSRect rectToDraw = rowRect;
+            rectToDraw.size.height = rowRect.size.height - 1;
+            rectToDraw.origin.y = rectToDraw.origin.y + 1;
+            [[NSColor jg_rowHighlightColor] set];
+            NSRectFill(rectToDraw);
+            
+            [aCell setTextColor:[NSColor whiteColor]];
+        } else {
+            NSGradient* aGradient =
+            [[[NSGradient alloc]
+              initWithColorsAndLocations:
+              [NSColor colorWithDeviceWhite:0.925 alpha:1.000], (CGFloat)0.0,
+              [NSColor colorWithDeviceWhite:0.753 alpha:1.000], (CGFloat)1.0,
+              nil]
+             autorelease];
+            NSRect rectToDraw = rowRect;
+            rectToDraw.size.height = rowRect.size.height - 1;
+            rectToDraw.origin.y = rectToDraw.origin.y + 1;
+            [aGradient drawInRect:rectToDraw angle:90];
+            
+            [aTableView unlockFocus];
+            
+            [aCell setTextColor:[NSColor blackColor]];
+        }
+		
 	} else if (item.enabled == YES) {
 		[aCell setTextColor:[NSColor labelColor]];
 
